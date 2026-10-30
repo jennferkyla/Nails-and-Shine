@@ -1,0 +1,74 @@
+NAILS AND SHINE - POLISHED VERSION  (read this first)
+=====================================================
+
+WHAT'S NEW
+- Each nail technician (Edlyn Joy Bermundo, Kristina Pascual, Laira Boniel) has their OWN schedule and working hours.
+  Clients choose a technician or "Any available". Mon-Fri 9AM-5PM, Sat 9AM-2PM, closed Sunday (editable per technician).
+- Logins: Owner (admin) sees everything. A technician sees only their own appointments and can block only their own time.
+- Admin > Settings: studio name, contact number, address, Facebook, opening hours text, booking rules, optional GCash reservation fee.
+- Forgot password, account page, login lock after 5 wrong tries, CSRF protection on every form, safe photo uploads,
+  Philippine time (Asia/Manila), reminder emails (cron), Privacy Notice page (RA 10173), errors hidden on the live site.
+
+PART 1 - INSTALL ON YOUR COMPUTER (XAMPP)
+1. BACKUP FIRST: phpMyAdmin > nailart > Export > Go. Also copy C:\xampp\htdocs\nailart somewhere safe.
+2. Extract nailart_PRO.zip. Select everything inside, copy, and paste into C:\xampp\htdocs\nailart. Choose "Replace the files".
+   (Your PHPMailer folder and your uploaded photos stay. Do not delete them.)
+3. phpMyAdmin > click "nailart" > SQL tab > open database\upgrade_from_current.sql in Notepad, copy ALL, paste, click Go. Run it ONCE.
+4. Open config.local.php (in the nailart folder) and fill in:
+      MAIL_USER = the Gmail you already use      MAIL_PASS = its 16-letter Google App Password (no spaces)
+   Leave ENV as 'development', BASE as '/nailart'. Save.
+5. Open http://localhost/nailart and press Ctrl+F5. Log in with your admin account.
+
+PART 2 - FIRST SETUP (as owner)
+1. Settings: check the studio info (number 09066985043, address, Facebook name). Paste the Facebook page link if you have it. Save.
+2. Technicians: check the hours of each technician. To give a technician their own login: type their email + a password (min 8)
+   under their name and press "Create login". Tell them to change the password in Account.
+3. Services / Add-ons / Portfolio: replace the sample prices and photos with the real ones.
+4. Settings > Reservation fee: leave OFF for now. To turn it on, enter amount + GCash number + name.
+
+PART 3 - TEST BEFORE LAUNCH (tick each)
+[ ] Book as a guest with "Any available" -> email received. Check which technician was assigned.
+[ ] Book again at the same time -> a different technician is assigned. Book a 3rd and 4th time -> "No open times".
+[ ] Book with a specific technician; the time list changes when you pick another technician.
+[ ] Technician login: sees only own appointments; blocks own time; blocked time disappears from booking for that technician only.
+[ ] Owner blocks "Everyone" for a whole day -> no times for any technician that day.
+[ ] Sunday shows no times. Saturday shows times only until 2PM.
+[ ] Admin confirms a booking -> client gets the "confirmed" email. Cancel -> "cancelled" email.
+[ ] Client cancels less than 24 hours before -> refused. More than 24 hours -> works.
+[ ] Complete an appointment -> that client can write a review; it appears on the home page.
+[ ] Forgot password -> email link works -> new password works.
+[ ] Wrong password 5 times -> locked for 15 minutes.
+[ ] Upload a JPG/PNG/WEBP photo works. A .php or .txt file is refused.
+[ ] Phone view (resize the browser): booking page is easy to use.
+
+PART 4 - PUT IT ONLINE (shared hosting with cPanel, e.g. Hostinger or Namecheap)
+Choose a plan that has: PHP 8.1 or newer, MySQL, free SSL (https), Cron Jobs, and File Manager.
+1. Buy the plan and (optional) a domain. In cPanel, turn on SSL (https) for the domain.
+2. cPanel > MySQL Databases: create a database, a database user and a password; add the user to the database (all privileges).
+3. phpMyAdmin (from cPanel) > select that database > Import. Easiest: Export your own XAMPP database (after step 3 of Part 1)
+   and import that file, so your data comes along. For an empty start, import database\install_fresh.sql instead.
+4. File Manager > public_html > Upload the whole nailart folder contents (zip it, upload, then Extract). Include the PHPMailer folder.
+5. Edit config.local.php on the host:
+      ENV = 'production'     BASE = ''  (if the site is at the root of the domain)     SITE_URL = 'https://yourdomain.com'
+      DB_HOST/DB_NAME/DB_USER/DB_PASS = the ones from step 2      MAIL_USER / MAIL_PASS as before
+6. Folders "uploads" and "logs" must be writable (permission 755, or 775 if uploads fail).
+7. Cron Jobs (cPanel): every hour (minute 0, every hour). Command (replace USERNAME; ask your host for the PHP path if it fails):
+      /usr/local/bin/php /home/USERNAME/public_html/cron/reminders.php
+8. Delete the "database" folder and START_HERE.txt from the server after setup. Test everything again on the live site (Part 3).
+If you will host it inside a subfolder, set BASE to that folder (example '/nails') and SITE_URL to match.
+
+SAFETY RULES FOR THE REAL BUSINESS
+- Only the owner has the admin login. Use a strong, unique password. Change it in Account.
+- Backup the database every week (phpMyAdmin > Export) or use the host's backup.
+- If the app shows "The site is temporarily unavailable", check the DB settings in config.local.php.
+- Errors on the live site are written to the logs folder, not shown to visitors.
+- Keep config.local.php private. Never post your App Password anywhere.
+
+HONEST LIMITS
+- Reservation fee is MANUAL: the client sends GCash, the owner presses "Mark paid". There is no automatic payment (that needs
+  a GCash/PayMongo business account and API keys).
+- No SMS. Reminder email is sent once, for CONFIRMED appointments, 24 hours before (changeable in Settings).
+- Gmail has daily sending limits (fine for a small studio). For many clients, use an email on the studio's own domain.
+- No "reschedule" button: the client cancels (24 hours before) and books again.
+- The Privacy Notice is a draft. Have it reviewed (your school or a professional) before the public launch.
+- This version could not be run on the computer that wrote it. Please do Part 3 completely before real clients use it.
